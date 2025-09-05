@@ -8,12 +8,12 @@ use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProductController;
 
-Route::post('/products-store', [ProductController::class, 'store']);
+/*Route::post('/products-store', [ProductController::class, 'store']);*/
 Route::get('/products-show/{id}', [ProductController::class, 'show']);
 Route::get('/products-index', [ProductController::class, 'index']);
 
 
-/*Route::middleware('check:role')->get('/products-index/{search?}/{id?}', [ProductController::class, 'index']);*/
+Route::middleware('check:role')->get('/products-index/{search?}/{id?}', [ProductController::class, 'index']);
 Route::patch('/products-update/{id}', [ProductController::class, 'update']);
 Route::delete('/products-destroy/{id}', [ProductController::class, 'destroy']);
 
