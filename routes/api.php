@@ -10,7 +10,7 @@ use App\Http\Controllers\ProductController;
 
 Route::post('/products-store', [ProductController::class, 'store']);
 Route::get('/products-show/{id}', [ProductController::class, 'show']);
-/*Route::get('/products-index', [ProductController::class, 'index']);*/
+Route::get('/products-index', [ProductController::class, 'index']);
 
 
 /*Route::middleware('check:role')->get('/products-index/{search?}/{id?}', [ProductController::class, 'index']);*/
