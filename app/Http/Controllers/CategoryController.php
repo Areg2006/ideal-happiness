@@ -14,8 +14,8 @@ class CategoryController extends Controller
         $query->when($searchTerm, function ($q, $searchTerm) {
             return $q->where('name', 'like', '%' . $searchTerm . '%');
         });
-        $categories = $query->get()->toArray(); // ✅ получаем результат запроса
-        dd($categories);
+        $categories = $query->get()->toArray();
+
         return response()->json($categories);
     }
 
@@ -65,24 +65,3 @@ class CategoryController extends Controller
         return response()->json(['message' => 'Категория не найдена'], 404);
     }
 }
-
-
-
-
-
-
-
-
-/*
-{
-    $categories=Category::find($id);
-    if (!$categories) {
-        return response()->json(['message' => 'Категория не найдена'], 404);
-    }
-    $request->validate([
-        'name' => 'required|string',
-        'id' => 'required|integer',
-    ]);
-    $categories->update($request->all());
-    return response()->json($categories);
-}*/
