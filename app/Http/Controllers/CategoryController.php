@@ -7,26 +7,22 @@ use App\Models\Category;
 
 class CategoryController extends Controller
 {
-
     public function index(Request $request)
     {
         $searchTerm = $request->input('search');
-
         $query = Category::query();
-
         $query->when($searchTerm, function ($q, $searchTerm) {
             return $q->where('name', 'like', '%' . $searchTerm . '%');
         });
-
-        $query->get();
-
-        return response()->json($query);
+        $categories = $query->get()->toArray(); // ✅ получаем результат запроса
+        dd($categories);
+        return response()->json($categories);
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string',
+            'name' => 'required|string|max:255',
         ]);
 
         $category = Category::create($validated);
@@ -37,7 +33,6 @@ class CategoryController extends Controller
     public function show(int $id)
     {
         $category = Category::find($id);
-
         if (!$category) {
             return response()->json(['message' => 'Категория не найдена'], 404);
         }
@@ -47,27 +42,29 @@ class CategoryController extends Controller
 
     public function update(Request $request, int $id)
     {
-        $categories = Category::find($id);
-
-        if (!$categories) {
+        $category = Category::find($id);
+        if (!$category) {
             return response()->json(['message' => 'Категория не найдена'], 404);
         }
 
-        $request->validate([
-            'name' => 'required|string',
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
         ]);
+        $category->update($validated);
 
-        $categories->update($request->all());
-
-        return response()->json($categories);
+        return response()->json($category);
     }
 
-    public function destroy(Request $request, int $id)
+    public function destroy(int $id)
     {
-        return Category::destroy($id);
+        $deleted = Category::destroy($id);
+        if ($deleted) {
+            return response()->json(['message' => 'Категория удалена', 'deleted' => $deleted]);
+        }
+
+        return response()->json(['message' => 'Категория не найдена'], 404);
     }
 }
-
 
 
 

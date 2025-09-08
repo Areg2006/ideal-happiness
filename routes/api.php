@@ -13,7 +13,7 @@ Route::get('/products-show/{id}', [ProductController::class, 'show']);
 Route::get('/products-index', [ProductController::class, 'index']);
 
 
-/*Route::middleware('check:role')->get('/products-index/{search?}/{id?}', [ProductController::class, 'index']);*/
+Route::middleware('check:role')->get('/products-index/{search?}/{id?}', [ProductController::class, 'index']);
 Route::patch('/products-update/{id}', [ProductController::class, 'update']);
 Route::delete('/products-destroy/{id}', [ProductController::class, 'destroy']);
 
@@ -41,6 +41,8 @@ Route::group(['prefix' => 'v1'], function () {
     Route::post('/login', [AuthenticationController::class, 'store']);
     Route::post('/logout', [AuthenticationController::class, 'destroy']);
     Route::middleware('auth:api')->group(function () {
-        Route::get('/products', [ProductController::class, 'index'])->name('login');
+        Route::get('/products', [ProductController::class, 'index']);
+        Route::post('/products', [ProductController::class, 'store']);
     });
+
 });

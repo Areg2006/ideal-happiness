@@ -10,23 +10,6 @@ use Illuminate\Support\Facades\Http;
 
 class AuthenticationController extends Controller
 
- /* public function login(Request $request){
-        $request->validate([
-            'email' => 'required|string|email',
-            'password' => 'required|string',
-        ]);
-
-        $response = Http::asForm()->post('http://localhost:8001' . '/oauth/token', [
-            'grant_type' => 'password',
-            'client_id' => env('PASSPORT_PASSWORD_CLIENT_ID'),
-            'client_secret' => env('PASSPORT_PASSWORD_CLIENT_SECRET'),
-            'username' => $request->email,
-            'password' => $request->password,
-            'scope' => '*',
-        ]);
-
-        return $response->json();
-    }*/
 {
     public function store(Request $request)
     {

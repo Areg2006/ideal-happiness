@@ -77,15 +77,22 @@ class ProductController extends Controller
 
     public function store(Request $request): JsonResponse
     {
+        $user = Auth::user();
+
+        if (is_null($user)) {
+            return response()->json([
+                'error' => 'You are not authorized to access this resource'
+            ], 401);
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'price' => 'required|numeric',
             'description' => 'nullable|string',
             'category_id' => 'required|integer|exists:categories,id',
             'category_id.exists' => 'Категория не найдена',
-            'user_id' => 'required|integer|exists:users,id',
         ]);
-
+          $validated['user_id'] = $user->id;
         $product = Product::create($validated);
 
         return response()->json($product, 201);
