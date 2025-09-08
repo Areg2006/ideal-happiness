@@ -14,7 +14,6 @@ class ProductController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
-
         if ($user->role === 'partnership') {
             return response()->json(['message' => 'У вас нет доступа'], 403);
         }
@@ -76,13 +75,11 @@ class ProductController extends Controller
     public function store(Request $request): JsonResponse
     {
         $user = Auth::user();
-
         if (is_null($user)) {
             return response()->json([
                 'error' => 'You are not authorized to access this resource'
             ], 401);
         }
-
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'price' => 'required|numeric',
@@ -106,7 +103,6 @@ class ProductController extends Controller
         return response()->json($product);
     }
 
-
     public function update(Request $request, int $id)
     {
         $product = Product::find($id);
@@ -125,7 +121,6 @@ class ProductController extends Controller
 
         return response()->json($product);
     }
-
 
     public function destroy(int $id)
     {
