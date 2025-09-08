@@ -18,9 +18,7 @@ class ProductController extends Controller
         if ($user->role === 'partnership') {
             return response()->json(['message' => 'У вас нет доступа'], 403);
         }
-
         $searchTerm = $request->query('q');
-
         $products = Product::query()
             ->when($user->role === 'user', function ($query) use ($user) {
                 $query->where('user_id', $user->id);
