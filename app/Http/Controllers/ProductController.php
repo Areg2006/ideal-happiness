@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
@@ -116,10 +117,39 @@ class ProductController extends Controller
             'category_id' => 'required|integer|exists:categories,id',
             'user_id' => 'required|integer|exists:users,id',
         ]);
-
         $product->update($request->all());
 
         return response()->json($product);
+    }
+
+    public function buy(int $id)
+    {
+        $user = Auth::user();
+        $product = Product::find($id);
+        if (!$product) {
+            return response()->json(['message' => "Продукт с идентификатором $id не найден"], 404);
+        }
+        if ($product->count <= 0) {
+            return response()->json(['message' => "Товар закончился"], 400);
+        }
+        if ($user->balance < $product->price) {
+            return response()->json(['message' => "Недостаточно средств"], 400);
+        }
+        DB::transaction(function () use ($user, $product) {
+            $product->count = $product->count - 1;
+            if ($product->count === 0) {
+                $product->is_archived = true;
+            }
+            $user->balance -= $product->price;
+            $user->save();
+            $product->save();
+        });
+
+        return response()->json([
+            'message' => 'Покупка успешно выполнена',
+            'balance' => $user->balance,
+            'product' => $product
+        ]);
     }
 
     public function destroy(int $id)
@@ -132,5 +162,4 @@ class ProductController extends Controller
 
         return response()->json(['message' => 'Продукт удалён']);
     }
-
 }
