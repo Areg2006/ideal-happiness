@@ -2,164 +2,62 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\ProductResource;
-use App\Models\Product;
-use App\Models\User;
-use Illuminate\Http\JsonResponse;
+use App\Services\ProductService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
-    public function index(Request $request)
-    {
-        $user = Auth::user();
-        if ($user->role === 'partnership') {
-            return response()->json(['message' => 'У вас нет доступа'], 403);
-        }
-        $searchTerm = $request->query('q');
-        $products = Product::query()
-            ->when($user->role === 'user', function ($query) use ($user) {
-                $query->where('user_id', $user->id);
-            })
-            ->when($searchTerm, function ($query) use ($searchTerm) {
-                $query->where('name', 'like', "%{$searchTerm}%");
-            })
-            ->when($request->filled('category_id'), function ($query) use ($request) {
-                $query->where('category_id', $request->category_id);
-            })
-            ->when($request->filled('price_from'), function ($query) use ($request) {
-                $query->where('price', '>=', $request->price_from);
-            })
-            ->when($request->filled('price_to'), function ($query) use ($request) {
-                $query->where('price', '<=', $request->price_to);
-            })
-            ->when($request->filled('sort_by'), function ($query) use ($request) {
-                $price = $request->get('sort', 'asc');
-                $query->orderBy($request->sort_by, $price);
-                $query->orderBy('created_at');
-            })
-            ->where('is_archived', false)
-            ->paginate($request->get('per_page'));
+    protected ProductService $service;
 
-        return ProductResource::collection($products);
+    public function __construct(ProductService $service)
+    {
+        $this->service = $service;
     }
 
-    public function attach(int $id)
+    public function index()
     {
-        $product = Product::find($id);
-        if (!$product) {
-            return response()->json(['message' => "Продукт с идентификатором $id не найден"], 404);
-        }
-
-        $product->is_archived = true;
-        $product->save();
-        return response()->json(['message' => "Продукт с идентификатором $id архиворован"]);
+        return $this->service->listProducts();
     }
 
-    public function showArchiveProduct()
+    public function store(Request $request)
     {
-        $products = Product::query()->where('is_archived', true)->with('category')->get();
-
-        return ProductResource::collection($products);
-    }
-
-    public function detach(int $id)
-    {
-        Product::where(['id' => $id])
-            ->update(['is_archived' => false]);
-
-        return response()->json(['message' => 'Продукт не архивирован']);
-    }
-
-    public function store(Request $request): JsonResponse
-    {
-        $user = Auth::user();
-        if (is_null($user)) {
-            return response()->json([
-                'error' => 'You are not authorized to access this resource'
-            ], 401);
-        }
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'price' => 'required|numeric',
-            'description' => 'nullable|string',
-            'category_id' => 'required|integer|exists:categories,id',
-            'category_id.exists' => 'Категория не найдена',
-        ]);
-          $validated['user_id'] = $user->id;
-        $product = Product::create($validated);
-
-        return response()->json($product, 201);
-    }
-
-    public function show(int $id): JsonResponse
-    {
-        $product = Product::with('category')->find($id);
-        if (!$product) {
-            return response()->json(['message' => 'Продукт не найден'], 404);
-        }
-
-        return response()->json($product);
+        return $this->service->createProduct($request);
     }
 
     public function update(Request $request, int $id)
     {
-        $product = Product::find($id);
-        if (!$product) {
-            return response()->json(['message' => 'Продукт не найден'], 404);
-        }
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'price' => 'required|numeric',
-            'description' => 'nullable|string',
-            'category_id' => 'required|integer|exists:categories,id',
-            'user_id' => 'required|integer|exists:users,id',
-        ]);
-        $product->update($request->all());
+        return $this->service->updateProduct($request, $id);
+    }
 
-        return response()->json($product);
+    public function destroy(int $id)
+    {
+        return $this->service->deleteProduct($id);
+    }
+
+    public function show(int $id)
+    {
+        return $this->service->showProduct($id);
+    }
+
+    public function archive(int $id)
+    {
+        return $this->service->archiveProduct($id);
+    }
+
+    public function unarchive(int $id)
+    {
+        return $this->service->unarchiveProduct($id);
+    }
+
+    public function archived()
+    {
+        return $this->service->getArchivedProducts();
     }
 
     public function buy(int $id)
     {
         $user = Auth::user();
-        $product = Product::find($id);
-        if (!$product) {
-            return response()->json(['message' => "Продукт с идентификатором $id не найден"], 404);
-        }
-        if ($product->count <= 0) {
-            return response()->json(['message' => "Товар закончился"], 400);
-        }
-        if ($user->balance < $product->price) {
-            return response()->json(['message' => "Недостаточно средств"], 400);
-        }
-        DB::transaction(function () use ($user, $product) {
-            $product->count = $product->count - 1;
-            if ($product->count === 0) {
-                $product->is_archived = true;
-            }
-            $user->balance -= $product->price;
-            $user->save();
-            $product->save();
-        });
-
-        return response()->json([
-            'message' => 'Покупка успешно выполнена',
-            'balance' => $user->balance,
-            'product' => $product
-        ]);
-    }
-
-    public function destroy(int $id)
-    {
-        $product = Product::find($id);
-        if (!$product) {
-            return response()->json(['message' => 'Продукт не найден'], 404);
-        }
-        $product->delete();
-
-        return response()->json(['message' => 'Продукт удалён']);
+        return response()->json($this->service->buyProduct($user, $id));
     }
 }
