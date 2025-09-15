@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Repositories\CategoryRepository;
-use Illuminate\Http\Request;
 
 class CategoryService
 {
@@ -13,10 +12,11 @@ class CategoryService
     {
         $this->categoryRepo = $categoryRepo;
     }
-    public function listCategories(Request $request)
+
+    public function listCategories(?string $searchTerm = null)
     {
-        $searchTerm = $request->input('search');
         $query = $this->categoryRepo->getQuery();
+
         if ($searchTerm) {
             $query->where('name', 'like', '%' . $searchTerm . '%');
         }
@@ -24,29 +24,21 @@ class CategoryService
         return response()->json($query->get(), 200);
     }
 
-    public function createCategory(Request $request)
+    public function createCategory(array $data)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:categories,name',
-        ]);
-
-        $category = $this->categoryRepo->create($validated);
+        $category = $this->categoryRepo->create($data);
 
         return response()->json($category, 201);
     }
 
-    public function updateCategory(Request $request, int $id)
+    public function updateCategory(array $data, int $id)
     {
         $category = $this->categoryRepo->find($id);
         if (!$category) {
             return response()->json(['message' => 'Категория не найдена'], 404);
         }
 
-        $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:categories,name,' . $category->id,
-        ]);
-
-        $updated = $this->categoryRepo->update($category, $validated);
+        $updated = $this->categoryRepo->update($category, $data);
 
         return response()->json($updated, 200);
     }

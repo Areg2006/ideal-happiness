@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ProductRequest;
 use App\Services\ProductService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class ProductController extends Controller
 {
@@ -15,19 +15,30 @@ class ProductController extends Controller
         $this->service = $service;
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        return $this->service->listProducts();
+
+        $request->validate(['filters.q' => 'nullable',
+            'filters.category_id' => 'required',
+            'price_from' => 'nullable',
+            'price_to' => 'nullable',
+            'sort_by' => 'nullable',
+            'sort' => 'nullable',
+            'page' => 'nullable',
+            'perPage' => 'nullable',]);
+        $filters = $request->query('filters');
+
+        return $this->service->index($filters);
     }
 
-    public function store(Request $request)
+    public function store(ProductRequest $request)
     {
-        return $this->service->createProduct($request);
+        return $this->service->createProduct($request->validated());
     }
 
-    public function update(Request $request, int $id)
+    public function update(ProductRequest $request, int $id)
     {
-        return $this->service->updateProduct($request, $id);
+        return $this->service->updateProduct($request->validated(), $id);
     }
 
     public function destroy(int $id)
@@ -55,9 +66,8 @@ class ProductController extends Controller
         return $this->service->getArchivedProducts();
     }
 
-    public function buy(int $id)
+    public function buy(int $productId)
     {
-        $user = Auth::user();
-        return response()->json($this->service->buyProduct($user, $id));
+        return $this->service->buyProduct($productId);
     }
 }

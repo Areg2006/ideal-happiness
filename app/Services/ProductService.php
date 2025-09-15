@@ -4,92 +4,59 @@ namespace App\Services;
 
 use App\Repositories\ProductRepository;
 use App\Repositories\UserRepository;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Http\Request;
 
 class ProductService
 {
     protected ProductRepository $productRepo;
+    protected UserRepository $userRepo;
 
-    public function __construct(ProductRepository $productRepo)
+    public function __construct(ProductRepository $productRepo, UserRepository $userRepo)
     {
         $this->productRepo = $productRepo;
+        $this->userRepo = $userRepo;
     }
 
-    public function listProducts()
+    public function index(array $filters = []): JsonResponse
     {
         $user = Auth::user();
-
-        $validated = request()->validate([
-            'filters' => 'nullable|array',
-            'filters.category_id' => 'nullable|integer',
-            'filters.q' => 'nullable|string|max:255',
-            'filters.price_from' => 'nullable|integer|min:0',
-            'filters.price_to' => 'nullable|integer|min:0',
-            'filters.sort_by' => 'nullable|string',
-            'filters.sort' => 'nullable|string|in:asc,desc',
-            'filters.page' => 'nullable|integer|min:1',
-            'filters.per_page' => 'nullable|integer|min:1|max:100',
-        ]);
-
-        $filters = $validated['filters'] ?? [];
-
         if (!$user) {
             return response()->json(['error' => 'Вы не авторизованы'], 401);
         }
-
         if ($user->role === 'admin') {
             $products = $this->productRepo->getAll($filters);
-            return response()->json($products, 200);
-        }
-
-        if ($user->role === 'user') {
+        } elseif ($user->role === 'user') {
             $products = $this->productRepo->getByUserId($user->id);
-            return response()->json($products, 200);
-        }
-
-        if ($user->role === 'partnership') {
+        } elseif ($user->role === 'partnership') {
             return response()->json(['message' => 'У вас нет доступа'], 403);
+        } else {
+            return response()->json(['message' => 'Роль не определена'], 400);
         }
 
-        return response()->json(['message' => 'Роль не определена'], 400);
+        return response()->json($products, 200);
     }
 
-    public function createProduct(Request $request)
+    public function createProduct(array $data): JsonResponse
     {
         $user = Auth::user();
         if (!$user) {
             return response()->json(['error' => 'Вы не авторизованы'], 401);
         }
 
-        $validated = $request->validate([
-            'name'        => 'required|string|max:255',
-            'price'       => 'required|numeric',
-            'description' => 'nullable|string',
-            'category_id' => 'required|integer|exists:categories,id',
-        ]);
-
-        $validated['user_id'] = $user->id;
-        return $this->productRepo->create($validated);
+        $data['user_id'] = $user->id;
+        return $this->productRepo->create($data);
     }
 
-    public function updateProduct(Request $request, int $id)
+    public function updateProduct(array $data, int $id)
     {
         $product = $this->productRepo->find($id);
         if (!$product) {
             return response()->json(['message' => 'Продукт не найден'], 404);
         }
 
-        $request->validate([
-            'name'        => 'required|string|max:255',
-            'price'       => 'required|numeric',
-            'description' => 'nullable|string',
-            'category_id' => 'required|integer|exists:categories,id',
-            'user_id'     => 'required|integer|exists:users,id',
-        ]);
-
-        return $this->productRepo->update($product, $request->all());
+        return $this->productRepo->update($product, $data);
     }
 
     public function deleteProduct(int $id)
@@ -109,6 +76,7 @@ class ProductService
         if (!$product) {
             return response()->json(['message' => 'Продукт не найден'], 404);
         }
+
         return $product->load('category');
     }
 
@@ -134,16 +102,23 @@ class ProductService
         return $this->productRepo->getArchived();
     }
 
-    public function buyProduct($user, int $productId)
+    public function buyProduct(int $productId)
     {
-        $product = $this->productRepo->find($productId);
+        $user = auth('api')->user();
 
+        if (!$user) {
+            return ['status' => 'error', 'message' => 'Вы не авторизованы'];
+        }
+
+        $product = $this->productRepo->find($productId);
         if (!$product) {
             return ['status' => 'error', 'message' => "Продукт с таким идентификатором не найден"];
         }
+
         if ($product->count <= 0) {
             return ['status' => 'error', 'message' => "Товар закончился"];
         }
+
         if ($user->balance < $product->price) {
             return ['status' => 'error', 'message' => "Недостаточно средств"];
         }
