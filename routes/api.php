@@ -33,13 +33,13 @@ Route::delete('/categories-delete/{id}', [CategoryController::class, 'destroy'])
 
 Route::middleware('auth:api')->group(function () {
     Route::get('/users', [UserController::class, 'index']);
-    Route::post('/users/create', [UserController::class, 'store']);
+    Route::post('/users', [UserController::class, 'store']);
 });
 
-Route::get('/users/{id}/show', [UserController::class, 'show']);
-Route::put('/users/{id}/update', [UserController::class, 'update']);
-Route::patch('/users/{id}/update', [UserController::class, 'update']);
-Route::delete('/users/{id}/delete', [UserController::class, 'destroy']);
+Route::get('/users/{id}/', [UserController::class, 'show']);
+Route::put('/users/{id}', [UserController::class, 'update']);
+Route::patch('/users/{id}', [UserController::class, 'update']);
+Route::delete('/users/{id}', [UserController::class, 'destroy']);
 
 
 
