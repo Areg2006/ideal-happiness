@@ -2,8 +2,15 @@
 
 namespace App\Http\Requests;
 
-class ProductRequest extends BaseRequest
+use App\Http\Requests\BaseRequest as BaseRequest;
+
+class ProductStoreRequest extends BaseRequest
 {
+    public const NAME = 'name';
+    public const PRICE = 'price';
+    public const DESCRIPTION = 'description';
+    public const CATEGORY_ID = 'category_id';
+
     public function authorize(): bool
     {
         return true;
@@ -17,10 +24,21 @@ class ProductRequest extends BaseRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:255',
-            'price' => 'required|numeric',
-            'description' => 'nullable|string',
-            'category_id' => 'required|integer|exists:categories,id',];
+            self::NAME => ['required',
+                'string',
+                'max:255'
+            ],
+            self::PRICE => ['required',
+                'numeric'
+            ],
+            self::DESCRIPTION => ['nullable',
+                'string'
+            ],
+            self::CATEGORY_ID => ['required',
+                'integer',
+                'exists:categories,id',
+            ],
+        ];
     }
 
     public function messages(): array
@@ -37,4 +55,23 @@ class ProductRequest extends BaseRequest
             'category_id.exists' => 'Выбранная категория не существует',
         ];
     }
+    public function getName(): string
+    {
+        return $this->get(self::NAME);
+    }
+
+    public function getPrice(): string
+    {
+        return $this->get(self::PRICE);
+    }
+
+    public function getDescription(): string
+    {
+        return $this->get(self::DESCRIPTION);
+    }
+    public function getCategory_id(): string
+    {
+        return $this->get(self::CATEGORY_ID);
+    }
+
 }

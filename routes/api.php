@@ -30,16 +30,14 @@ Route::patch('/categories-update/{id}', [CategoryController::class, 'update']);
 Route::delete('/categories-delete/{id}', [CategoryController::class, 'destroy']);
 
 
-
 Route::middleware('auth:api')->group(function () {
     Route::get('/users', [UserController::class, 'index']);
-    Route::post('/users', [UserController::class, 'store']);
+    Route::post('/store', [UserController::class, 'store']);
 });
 
-Route::get('/users/{id}/', [UserController::class, 'show']);
-Route::put('/users/{id}', [UserController::class, 'update']);
-Route::patch('/users/{id}', [UserController::class, 'update']);
-Route::delete('/users/{id}', [UserController::class, 'destroy']);
+Route::get('/users/show/{id}/', [UserController::class, 'show']);
+Route::patch('/update/{id}', [UserController::class, 'update']);
+Route::delete('/delete/{id}', [UserController::class, 'destroy']);
 
 
 

@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\CategoryRequest;
+use App\DTO\CategoryStoreDTO;
+use App\DTO\CategoryUpdateDTO;
+use App\Http\Requests\CategoryStoreRequest;
+use App\Http\Requests\CategoryUpdateRequest;
 use App\Services\CategoryService;
 use Illuminate\Http\Request;
 
@@ -20,9 +23,13 @@ class CategoryController extends Controller
         return $this->service->listCategories($request);
     }
 
-    public function store(CategoryRequest $request)
+    public function store(CategoryStoreRequest $request)
     {
-        return $this->service->createCategory($request->validated());
+        $dto=new CategoryStoreDTO(
+            name:$request->getName,
+        );
+        $category=$this->service->createCategory($dto);
+        return response()->json($category);
     }
 
     public function show(int $id)
@@ -30,9 +37,14 @@ class CategoryController extends Controller
         return $this->service->showCategory($id);
     }
 
-    public function update(CategoryRequest $request, int $id)
+    public function update(CategoryUpdateRequest $request)
     {
-        return $this->service->updateCategory($request->validated(), $id);
+        $dto=new CategoryUpdateDTO(
+            id:$request->getID(),
+            name:$request->getName()
+        );
+        $category=$this->service->updateCategory($dto);
+        return response()->json($category);
     }
 
     public function destroy(int $id)
