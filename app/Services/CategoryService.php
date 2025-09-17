@@ -2,7 +2,11 @@
 
 namespace App\Services;
 
+use App\DTO\CategoryStoreDTO;
+use App\DTO\CategoryUpdateDTO;
+use App\Models\Category;
 use App\Repositories\CategoryRepository;
+use Illuminate\Support\Facades\Auth;
 
 class CategoryService
 {
@@ -24,23 +28,28 @@ class CategoryService
         return response()->json($query->get(), 200);
     }
 
-    public function createCategory(array $data)
+    public function createCategory(CategoryStoreDTO $dto)
     {
-        $category = $this->categoryRepo->create($data);
-
-        return response()->json($category, 201);
+        $authUser = Auth::user();
+        if (!$authUser) {
+            abort(401, 'Вы не авторизованы');
+        }
+        return Category::create([
+            'name' => $dto->name,
+        ]);
     }
 
-    public function updateCategory(array $data, int $id)
+    public function updateCategory(int $id, CategoryUpdateDTO $dto): Category
     {
         $category = $this->categoryRepo->find($id);
         if (!$category) {
-            return response()->json(['message' => 'Категория не найдена'], 404);
+            abort(404, 'Категория не найдена');
         }
-
-        $updated = $this->categoryRepo->update($category, $data);
-
-        return response()->json($updated, 200);
+        $category->update([
+            'id' => $dto->id,
+            'name' => $dto->name,
+        ]);
+        return $category;
     }
 
     public function deleteCategory(int $id)

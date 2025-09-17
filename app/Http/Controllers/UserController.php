@@ -2,8 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\UserRequest;
+use App\DTO\UserStoreDTO;
+use App\DTO\UserUpdateDTO;
+use App\Http\Requests\UserStoreRequest;
+use App\Http\Requests\UserUpdateRequest;
 use App\Services\UserService;
+
 
 class UserController extends Controller
 {
@@ -19,9 +23,19 @@ class UserController extends Controller
         return $this->service->listUser();
     }
 
-    public function store(UserRequest $request)
+    public function store(UserStoreRequest $request)
     {
-        return $this->service->createUser($request->validated());
+        $dto = new UserStoreDTO(
+            name: $request->getName(),
+            email: $request->getEmail(),
+            password: $request->getPassword(),
+            role: $request->getRole(),
+            balance: $request->getBalance()
+        );
+
+        $user = $this->service->createUser($dto);
+
+        return response()->json($user);
     }
 
     public function show($id)
@@ -29,10 +43,21 @@ class UserController extends Controller
         return $this->service->showUser($id);
     }
 
-    public function update(UserRequest $request, int $id)
+    public function update(UserUpdateRequest $request)
     {
-        return $this->service->updateUser($request->validated(), $id);
+        $dto = new UserUpdateDTO(
+            id: $request->getID(),
+            name: $request->getName(),
+            email: $request->getEmail(),
+            role: $request->getRole(),
+            balance: $request->getBalance()
+        );
+
+        $user = $this->service->updateUser($dto);
+
+        return response()->json($user);
     }
+
 
     public function destroy(int $id)
     {

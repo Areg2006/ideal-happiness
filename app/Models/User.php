@@ -22,7 +22,7 @@ class User extends Authenticatable
     ];
 
     protected $casts = [
-        'password' => 'hashed',
+        'password' => 'bcrypt',
     ];
 
     protected $hidden = [
