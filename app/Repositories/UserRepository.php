@@ -10,6 +10,7 @@ class UserRepository
     {
         return User::find($id);
     }
+
     public function getByUserId(int $userId)
     {
         return User::where('id', $userId)->get();
@@ -26,17 +27,13 @@ class UserRepository
         return $user;
     }
 
-    public function delete($user){
+    public function delete($user)
+    {
         $user->delete();
     }
+
     public function getAll()
     {
         return User::all();
-    }
-
-
-    public function save($user)
-    {
-        $user->save();
     }
 }
