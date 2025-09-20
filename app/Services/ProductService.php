@@ -5,6 +5,7 @@ namespace App\Services;
 use App\DTO\ProductStoreDTO;
 use App\DTO\ProductUpdateDTO;
 use App\Models\Product;
+use App\ProductException\InvalidProductException;
 use App\Repositories\ProductRepository;
 use App\Repositories\UserRepository;
 use Illuminate\Http\JsonResponse;
@@ -72,7 +73,7 @@ class ProductService
             'category_id' => $dto->categoryId,
         ]);
 
-            return $product;
+        return $product;
     }
 
     public function deleteProduct(int $id)
@@ -128,12 +129,14 @@ class ProductService
 
         $product = $this->productRepo->find($productId);
         if (!$product) {
-            return ['status' => 'error', 'message' => "Продукт с таким идентификатором не найден"];
+            return ['status' => 'error', 'message' => "Продукт с ID {$productId} не найден"];
         }
 
         if ($product->count <= 0) {
-            return ['status' => 'error', 'message' => "Товар закончился"];
+            throw new InvalidProductException(
+                "Товара '{$product->name}' нет в наличии");
         }
+        echo "Вы купили товара '{$product->name}'";
 
         if ($user->balance < $product->price) {
             return ['status' => 'error', 'message' => "Недостаточно средств"];
