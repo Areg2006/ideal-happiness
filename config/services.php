@@ -31,4 +31,8 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'exchange' => [
+        'base_url' => env('EXCHANGE_API_URL', 'https://api.exchangerate.host'),
+        'api_key' => env('EXCHANGE_API_KEY'),
+    ],
 ];

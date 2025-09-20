@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthenticationController;
+use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -30,19 +31,18 @@ Route::patch('/categories-update/{id}', [CategoryController::class, 'update']);
 Route::delete('/categories-delete/{id}', [CategoryController::class, 'destroy']);
 
 
-
 Route::middleware('auth:api')->group(function () {
     Route::get('/users', [UserController::class, 'index']);
-    Route::post('/users', [UserController::class, 'store']);
+    Route::post('/store', [UserController::class, 'store']);
+    Route::get('/users/{id}', [UserController::class, 'changePassword']);
 });
 
-Route::get('/users/{id}/', [UserController::class, 'show']);
-Route::put('/users/{id}', [UserController::class, 'update']);
-Route::patch('/users/{id}', [UserController::class, 'update']);
-Route::delete('/users/{id}', [UserController::class, 'destroy']);
+Route::get('/users/show/{id}/', [UserController::class, 'show']);
+Route::patch('/update/{id}', [UserController::class, 'update']);
+Route::delete('/delete/{id}', [UserController::class, 'destroy']);
 
-
-
+Route::post('/password/forgot', [PasswordResetController::class, 'requestReset']);
+Route::post('/password/reset', [PasswordResetController::class, 'resetPassword']);
 
 
 

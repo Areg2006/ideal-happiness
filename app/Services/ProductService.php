@@ -2,6 +2,10 @@
 
 namespace App\Services;
 
+use App\DTO\ProductStoreDTO;
+use App\DTO\ProductUpdateDTO;
+use App\Models\Product;
+use App\ProductException\InvalidProductException;
 use App\Repositories\ProductRepository;
 use App\Repositories\UserRepository;
 use Illuminate\Http\JsonResponse;
@@ -38,25 +42,38 @@ class ProductService
         return response()->json($products, 200);
     }
 
-    public function createProduct(array $data): JsonResponse
+    public function createProduct(ProductStoreDTO $dto): Product
     {
-        $user = Auth::user();
-        if (!$user) {
-            return response()->json(['error' => 'Вы не авторизованы'], 401);
+        $authUser = Auth::user();
+        if (!$authUser) {
+            abort(401, 'Вы не авторизованы');
         }
 
-        $data['user_id'] = $user->id;
-        return $this->productRepo->create($data);
+        return Product::create([
+            'name' => $dto->name,
+            'price' => $dto->price,
+            'description' => $dto->description,
+            'category_id' => $dto->categoryId,
+        ]);
+
     }
 
-    public function updateProduct(array $data, int $id)
+    public function updateProduct(int $id, ProductUpdateDTO $dto): Product
     {
         $product = $this->productRepo->find($id);
         if (!$product) {
-            return response()->json(['message' => 'Продукт не найден'], 404);
+            abort(404, 'Продукт не найден');
         }
 
-        return $this->productRepo->update($product, $data);
+        $product->update([
+            'id' => $dto->id,
+            'name' => $dto->name,
+            'price' => $dto->price,
+            'description' => $dto->description,
+            'category_id' => $dto->categoryId,
+        ]);
+
+        return $product;
     }
 
     public function deleteProduct(int $id)
@@ -112,12 +129,14 @@ class ProductService
 
         $product = $this->productRepo->find($productId);
         if (!$product) {
-            return ['status' => 'error', 'message' => "Продукт с таким идентификатором не найден"];
+            return ['status' => 'error', 'message' => "Продукт с ID {$productId} не найден"];
         }
 
         if ($product->count <= 0) {
-            return ['status' => 'error', 'message' => "Товар закончился"];
+            throw new InvalidProductException(
+                "Товара '{$product->name}' нет в наличии");
         }
+        echo "Вы купили товара '{$product->name}'";
 
         if ($user->balance < $product->price) {
             return ['status' => 'error', 'message' => "Недостаточно средств"];
