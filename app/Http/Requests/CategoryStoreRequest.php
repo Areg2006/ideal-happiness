@@ -21,10 +21,12 @@ class CategoryStoreRequest extends BaseRequest
     public function rules(): array
     {
         return [
-            self::NAME => 'required',
+            self::NAME => [
+                'required',
                 'string',
                 'max:255',
                 'unique:categories,name,'
+                ],
         ];
     }
 

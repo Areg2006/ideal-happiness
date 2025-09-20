@@ -25,10 +25,10 @@ class CategoryController extends Controller
 
     public function store(CategoryStoreRequest $request)
     {
-        $dto=new CategoryStoreDTO(
-            name:$request->getName,
+        $dto = new CategoryStoreDTO(
+            name: $request->getName,
         );
-        $category=$this->service->createCategory($dto);
+        $category = $this->service->createCategory($dto);
         return response()->json($category);
     }
 
@@ -39,11 +39,11 @@ class CategoryController extends Controller
 
     public function update(CategoryUpdateRequest $request)
     {
-        $dto=new CategoryUpdateDTO(
-            id:$request->getID(),
-            name:$request->getName()
+        $dto = new CategoryUpdateDTO(
+            id: $request->getID(),
+            name: $request->getName()
         );
-        $category=$this->service->updateCategory($dto);
+        $category = $this->service->updateCategory($dto);
         return response()->json($category);
     }
 

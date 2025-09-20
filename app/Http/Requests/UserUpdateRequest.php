@@ -37,15 +37,18 @@ class UserUpdateRequest extends BaseRequest
                     'string',
                     'max:255'
                 ],
-                self::EMAIL => ['required',
+                self::EMAIL => [
+                    'required',
                     'email',
                     'unique:users',
                     'email'
                 ],
-                self::ROLE => ['required',
+                self::ROLE => [
+                    'required',
                     'string'
                 ],
-                self::BALANCE => ['required',
+                self::BALANCE => [
+                    'required',
                     'integer'
                 ],
             ];
