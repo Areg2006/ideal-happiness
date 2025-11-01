@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\ProductRequest;
+use App\DTO\ProductStoreDTO;
+use App\DTO\ProductUpdateDTO;
+use App\Http\Requests\ProductStoreRequest;
+use App\Http\Requests\ProductUpdateRequest;
 use App\Services\ProductService;
 use Illuminate\Http\Request;
 
@@ -31,14 +34,32 @@ class ProductController extends Controller
         return $this->service->index($filters);
     }
 
-    public function store(ProductRequest $request)
+    public function store(ProductStoreRequest $request)
     {
-        return $this->service->createProduct($request->validated());
+        $dto = new ProductStoreDTO(
+            name:$request->getName(),
+            price:$request->getPrice(),
+            description:$request->getDescription(),
+            categoryId: $request->getCategory_id()
+        );
+
+        $product= $this->service->createProduct($dto);
+
+        return response()->json($product);
     }
 
-    public function update(ProductRequest $request, int $id)
+    public function update(ProductUpdateRequest $request)
     {
-        return $this->service->updateProduct($request->validated(), $id);
+        $dto = new ProductUpdateDTO(
+            id:$request->getID(),
+            name:$request->getName(),
+            price:$request->getPrice(),
+            description:$request->getDescription(),
+            categoryId: $request->getCategory_id()
+        );
+
+        $product= $this->service->updateProduct($dto);
+        return response()->json($product);
     }
 
     public function destroy(int $id)
