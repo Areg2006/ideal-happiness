@@ -32,6 +32,11 @@ class UserRepository
         $user->delete();
     }
 
+    public function save(User $user)
+    {
+        $user->save();
+    }
+
     public function getAll()
     {
         return User::all();
