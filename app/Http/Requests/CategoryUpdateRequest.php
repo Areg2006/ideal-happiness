@@ -23,13 +23,16 @@ class CategoryUpdateRequest extends BaseRequest
     public function rules(): array
     {
         return [
-            self::ID => ['required',
+            self::ID => [
+                'required',
                 'integer',
                 'exists:categories,id'
             ],
-            self::NAME => ['required',
+            self::NAME => [
+                'required',
                 'string',
-                'max:255'],
+                'max:255'
+            ],
         ];
     }
 

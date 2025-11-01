@@ -24,17 +24,21 @@ class ProductStoreRequest extends BaseRequest
     public function rules(): array
     {
         return [
-            self::NAME => ['required',
+            self::NAME => [
+                'required',
                 'string',
                 'max:255'
             ],
-            self::PRICE => ['required',
+            self::PRICE => [
+                'required',
                 'numeric'
             ],
-            self::DESCRIPTION => ['nullable',
+            self::DESCRIPTION => [
+                'nullable',
                 'string'
             ],
-            self::CATEGORY_ID => ['required',
+            self::CATEGORY_ID => [
+                'required',
                 'integer',
                 'exists:categories,id',
             ],
@@ -69,7 +73,8 @@ class ProductStoreRequest extends BaseRequest
     {
         return $this->get(self::DESCRIPTION);
     }
-    public function getCategory_id(): string
+
+    public function getCategory_Id(): string
     {
         return $this->get(self::CATEGORY_ID);
     }

@@ -37,13 +37,13 @@ class ProductController extends Controller
     public function store(ProductStoreRequest $request)
     {
         $dto = new ProductStoreDTO(
-            name:$request->getName(),
-            price:$request->getPrice(),
-            description:$request->getDescription(),
-            categoryId: $request->getCategory_id()
+            name: $request->getName(),
+            price: $request->getPrice(),
+            description: $request->getDescription(),
+            categoryId: $request->getCategory_Id()
         );
 
-        $product= $this->service->createProduct($dto);
+        $product = $this->service->createProduct($dto);
 
         return response()->json($product);
     }
@@ -51,14 +51,14 @@ class ProductController extends Controller
     public function update(ProductUpdateRequest $request)
     {
         $dto = new ProductUpdateDTO(
-            id:$request->getID(),
-            name:$request->getName(),
-            price:$request->getPrice(),
-            description:$request->getDescription(),
-            categoryId: $request->getCategory_id()
+            id: $request->getID(),
+            name: $request->getName(),
+            price: $request->getPrice(),
+            description: $request->getDescription(),
+            categoryId: $request->getCategory_Id()
         );
 
-        $product= $this->service->updateProduct($dto);
+        $product = $this->service->updateProduct($dto);
         return response()->json($product);
     }
 

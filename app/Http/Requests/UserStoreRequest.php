@@ -30,19 +30,23 @@ class UserStoreRequest extends BaseRequest
                 'string',
                 'max:255'
             ],
-            self::EMAIL => ['required',
+            self::EMAIL => [
+                'required',
                 'email',
                 'unique:users',
                 'email'
             ],
-            self::PASSWORD => ['required', '
-            string',
+            self::PASSWORD => [
+                'required',
+                'string',
                 'min:6'
             ],
-            self::ROLE => ['required',
+            self::ROLE => [
+                'required',
                 'string'
             ],
-            self::BALANCE => ['required',
+            self::BALANCE => [
+                'required',
                 'integer'
             ],
         ];
